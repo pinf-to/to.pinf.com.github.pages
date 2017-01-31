@@ -31,15 +31,11 @@ function EXPORTS_publish {
 
         git clean -d -x -f
         git fetch source
-        git merge source/master
+        git merge source/master -m "Merged from master"
 
         CALL_boilerplate copy_minimal_as_base "$@"
         git add -A . 2> /dev/null || true
         git commit -m "Updated base template" 2> /dev/null || true
-
-echo "PWD: $(pwd)"
-
-git remote show origin
 
         git push origin gh-pages
 
