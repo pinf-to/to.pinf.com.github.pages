@@ -33,9 +33,9 @@ function EXPORTS_publish {
         git fetch source
         git merge source/master -m "Merged from master"
 
-        CALL_boilerplate copy_minimal_as_base "$@"
-        git add -A . 2> /dev/null || true
-        git commit -m "Updated base template" 2> /dev/null || true
+#        CALL_boilerplate copy_minimal_as_base "$@"
+#        git add -A . 2> /dev/null || true
+#        git commit -m "Updated base template" 2> /dev/null || true
 
         git push origin gh-pages
 
