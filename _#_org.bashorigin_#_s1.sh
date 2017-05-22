@@ -38,9 +38,35 @@ function EXPORTS_publish {
         BO_run_node --eval '
             const PATH = require("path");
             const FS = require("fs-extra");
+            const CODEBLOCK = require("codeblock");
             const BOILERPLATE = require("'$(CALL_boilerplate getJSRequirePath)'");
 
-            var config = JSON.parse(process.argv[1]);
+
+            var config = JSON.parse(process.argv[1]); 
+
+            function prepareAnchorCode (code) {
+                if (code[".@"] === "github.com~0ink~codeblock/codeblock:Codeblock") {
+                    code = CODEBLOCK.run(code, {}, {
+                        sandbox: {
+                            require: require
+                        }
+                    });
+                }
+                return code;
+            }
+
+            if (
+                config &&
+                config.anchors &&
+                config.anchors.body
+            ) {
+                var targetPath = "index.html";
+                var code = config.anchors.body;
+                code = prepareAnchorCode(code);
+                code = BOILERPLATE.wrapHTML(code);
+                FS.outputFileSync(targetPath, code, "utf8");
+            }
+
             if (
                 config &&
                 config.files
@@ -49,6 +75,7 @@ function EXPORTS_publish {
                     var targetPath = PATH.join("'$pagesClonePath'", targetSubpath);
                     if (/\.html?$/.test(targetSubpath)) {
                         var code = FS.readFileSync(config.files[targetSubpath], "utf8");
+                        code = prepareAnchorCode(code);
                         code = BOILERPLATE.wrapHTML(code);
                         FS.outputFileSync(targetPath, code, "utf8");
                     } else {

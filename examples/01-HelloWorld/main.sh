@@ -8,7 +8,19 @@ depend {
 
 CALL_pages publish {
     "anchors": {
-        "body": "<a href='/to.pinf.com.github.pages/examples/01-HelloWorld/index.html'>examples/01-HelloWorld</a>"
+        "body": (javascript () >>>
+
+            const PATH = require("path")
+            const FS = require("fs");
+
+            return [
+                "<ul>",
+                FS.readdirSync(PATH.join("$__DIRNAME", "examples")).map(function (filename) {
+                    return "<li><a href='/to.pinf.com.github.pages/examples/" + filename + "/index.html'>examples/" + filename + "</a></li>";
+                }).join("\n"),
+                "</ul>"
+            ].join("\n");
+        <<<)
     },
     "files": {
         "/examples/01-HelloWorld/index.html": "$__DIRNAME__/index.html"
