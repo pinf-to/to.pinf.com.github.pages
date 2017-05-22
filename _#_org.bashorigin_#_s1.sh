@@ -40,8 +40,6 @@ function EXPORTS_publish {
             const FS = require("fs-extra");
             const BOILERPLATE = require("'$(CALL_boilerplate getJSRequirePath)'");
 
-console.log("BOILERPLATE", BOILERPLATE);
-
             var config = JSON.parse(process.argv[1]);
             if (
                 config &&
@@ -49,13 +47,10 @@ console.log("BOILERPLATE", BOILERPLATE);
             ) {
                 Object.keys(config.files).forEach(function (targetSubpath) {
                     var targetPath = PATH.join("'$__DIRNAME__'", targetSubpath);
-
-console.log("PATHS", config.files[targetSubpath], targetPath);
-
                     if (/\.html?$/.test(targetPath)) {
                         var code = FS.readFileSync(config.files[targetSubpath], "utf8");
                         code = BOILERPLATE.wrapHTML(code);
-                        FS.writeOutputSync(targetPath, code, "utf8");
+                        FS.outputFileSync(targetPath, code, "utf8");
                     } else {
                         FS.copySync(config.files[targetSubpath], targetPath);
                     }
