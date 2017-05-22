@@ -46,8 +46,8 @@ function EXPORTS_publish {
                 config.files
             ) {
                 Object.keys(config.files).forEach(function (targetSubpath) {
-                    var targetPath = PATH.join("'$__DIRNAME__'", targetSubpath);
-                    if (/\.html?$/.test(targetPath)) {
+                    var targetPath = PATH.join("'$pagesClonePath'", targetSubpath);
+                    if (/\.html?$/.test(targetSubpath)) {
                         var code = FS.readFileSync(config.files[targetSubpath], "utf8");
                         code = BOILERPLATE.wrapHTML(code);
                         FS.outputFileSync(targetPath, code, "utf8");
