@@ -7,10 +7,11 @@ depend {
 }
 
 CALL_pages publish {
-    "args": {
-        "anchors": {
-            "body": "<a href='/to.pinf.com.github.pages/examples/01-HelloWorld/index.html'>examples/01-HelloWorld</a>"
-        }
+    "anchors": {
+        "body": "<a href='/to.pinf.com.github.pages/examples/01-HelloWorld/index.html'>examples/01-HelloWorld</a>"
+    },
+    "files": {
+        "/examples/01-HelloWorld/index.html": "$__DIRNAME__/index.html"
     }
 }
 

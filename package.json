@@ -2,7 +2,8 @@
   "name": "to.pinf.com.github.pages",
   "version": "0.1.0",
   "dependencies": {
-    "bash.origin.test": "^0.1.29"
+    "bash.origin.test": "^0.1.29",
+    "fs-extra": "^3.0.1"
   },
   "scripts": {
     "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin bash.origin.test examples"

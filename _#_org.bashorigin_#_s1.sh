@@ -34,6 +34,35 @@ function EXPORTS_publish {
         git merge source/master -m "Merged from master"
 
         CALL_boilerplate copy_minimal_as_base "$@"
+
+        BO_run_node --eval '
+            const PATH = require("path");
+            const FS = require("fs-extra");
+            const BOILERPLATE = require("'$(CALL_boilerplate getJSRequirePath)'");
+
+console.log("BOILERPLATE", BOILERPLATE);
+
+            var config = JSON.parse(process.argv[1]);
+            if (
+                config &&
+                config.files
+            ) {
+                Object.keys(config.files).forEach(function (targetSubpath) {
+                    var targetPath = PATH.join("'$__DIRNAME__'", targetSubpath);
+
+console.log("PATHS", config.files[targetSubpath], targetPath);
+
+                    if (/\.html?$/.test(targetPath)) {
+                        var code = FS.readFileSync(config.files[targetSubpath], "utf8");
+                        code = BOILERPLATE.wrapHTML(code);
+                        FS.writeOutputSync(targetPath, code, "utf8");
+                    } else {
+                        FS.copySync(config.files[targetSubpath], targetPath);
+                    }
+                });
+            }
+        ' "$@"
+
         git add -A . 2> /dev/null || true
         git commit -m "Updated base template" 2> /dev/null || true
 
