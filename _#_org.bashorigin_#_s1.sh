@@ -41,8 +41,8 @@ function EXPORTS_publish {
             const CODEBLOCK = require("$__DIRNAME__/node_modules/codeblock");
             const BOILERPLATE = require("'$(CALL_boilerplate getJSRequirePath)'");
 
-            const MARKED = require("marked");
-            const HIGHLIGHT = require("highlight.js");
+            const MARKED = require("$__DIRNAME__/node_modules/marked");
+            const HIGHLIGHT = require("$__DIRNAME__/node_modules/highlight.js");
 
             const VERBOSE = !!process.env.VERBOSE;
 
