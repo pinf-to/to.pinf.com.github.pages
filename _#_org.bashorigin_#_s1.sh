@@ -37,14 +37,55 @@ function EXPORTS_publish {
 
         BO_run_node --eval '
             const PATH = require("path");
-            const FS = require("fs-extra");
-            const CODEBLOCK = require("codeblock");
+            const FS = require("$__DIRNAME__/node_modules/fs-extra");
+            const CODEBLOCK = require("$__DIRNAME__/node_modules/codeblock");
             const BOILERPLATE = require("'$(CALL_boilerplate getJSRequirePath)'");
 
+            const MARKED = require("marked");
+            const HIGHLIGHT = require("highlight.js");
 
-            var config = JSON.parse(process.argv[1]); 
+            const VERBOSE = !!process.env.VERBOSE;
+
+
+            var config = JSON.parse(process.argv[1]);
+
+            var uriDepth = 0;
+            if (config.cd) {
+                uriDepth = config.cd.split("/").length;
+                var path = PATH.join(process.cwd(), config.cd);
+                if (!FS.existsSync(path)) {
+                    FS.mkdirsSync(path);
+                }
+                process.chdir(path);
+            }
+
+            if (VERBOSE) console.log("cwd:", process.cwd());
 
             function prepareAnchorCode (code) {
+
+                if (/^\//.test(code)) {
+                    var path = code;
+
+                    if (/\.md$/.test(path)) {
+                        // TODO: Relocate this.
+
+                        code = FS.readFileSync(path, "utf8");
+
+                        var tokens = MARKED.lexer(code);
+
+                        code = MARKED.parser(tokens, {
+                            highlight: function (code, type) {
+                                if (type) {
+                                    return HIGHLIGHT.highlight(type, code, true).value;
+                                }
+                                return HIGHLIGHT.highlightAuto(code).value;
+                            }
+                        });
+                    } else {
+                        throw new Error("No parser found for file: " + path);
+                    }
+                }
+
                 if (code[".@"] === "github.com~0ink~codeblock/codeblock:Codeblock") {
                     code = CODEBLOCK.run(code, {}, {
                         sandbox: {
@@ -52,7 +93,19 @@ function EXPORTS_publish {
                         }
                     });
                 }
+
                 return code;
+            }
+
+            var css = "";
+            if (config.css) {
+                css = config.css;
+                if (css[".@"] === "github.com~0ink~codeblock/codeblock:Codeblock") {
+                    css = CODEBLOCK.thawFromJSON(css);
+                    if (css.getFormat() === "css") {
+                        css = css.getCode();                        
+                    }
+                }
             }
 
             if (
@@ -63,7 +116,10 @@ function EXPORTS_publish {
                 var targetPath = "index.html";
                 var code = config.anchors.body;
                 code = prepareAnchorCode(code);
-                code = BOILERPLATE.wrapHTML(code);
+                code = BOILERPLATE.wrapHTML(code, {
+                    css: css,
+                    uriDepth: uriDepth
+                });
                 FS.outputFileSync(targetPath, code, "utf8");
             }
 
@@ -72,23 +128,28 @@ function EXPORTS_publish {
                 config.files
             ) {
                 Object.keys(config.files).forEach(function (targetSubpath) {
-                    var targetPath = PATH.join("'$pagesClonePath'", targetSubpath);
                     if (/\.html?$/.test(targetSubpath)) {
                         var code = FS.readFileSync(config.files[targetSubpath], "utf8");
                         code = prepareAnchorCode(code);
-                        code = BOILERPLATE.wrapHTML(code);
-                        FS.outputFileSync(targetPath, code, "utf8");
+                        code = BOILERPLATE.wrapHTML(code, {
+                            css: css,
+                            uriDepth: uriDepth + (targetSubpath.split("/").length - 1)
+                        });
+                        FS.outputFileSync(targetSubpath, code, "utf8");
                     } else {
-                        FS.copySync(config.files[targetSubpath], targetPath);
+                        FS.copySync(config.files[targetSubpath], targetSubpath);
                     }
                 });
             }
         ' "$@"
 
-        git add -A . 2> /dev/null || true
-        git commit -m "Updated base template" 2> /dev/null || true
+        if ! BO_has_cli_arg "--dryrun"; then
 
-        git push origin gh-pages
+            git add -A . 2> /dev/null || true
+            git commit -m "Updated pages" 2> /dev/null || true
+
+            git push origin gh-pages
+        fi
 
     popd > /dev/null
 

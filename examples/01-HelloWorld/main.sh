@@ -7,6 +7,11 @@ depend {
 }
 
 CALL_pages publish {
+    "css": (css () >>>
+        BODY {
+            padding-left: 10px;
+        }
+    <<<),
     "anchors": {
         "body": (javascript () >>>
 
@@ -14,16 +19,18 @@ CALL_pages publish {
             const FS = require("fs");
 
             return [
-                "<ul>",
+                '<p><b>Source:</b> <a href="https://github.com/pinf-to/to.pinf.com.github.pages">github.com/pinf-to/to.pinf.com.github.pages</a></p>',
+                '<h1>Examples</h1>',
+                '<ul>',
                 FS.readdirSync(PATH.join("$__DIRNAME", "examples")).map(function (filename) {
-                    return "<li><a href='/to.pinf.com.github.pages/examples/" + filename + "/index.html'>examples/" + filename + "</a></li>";
+                    return '<li><a href="examples/' + filename + '/index.html">' + filename + '</a></li>';
                 }).join("\n"),
-                "</ul>"
+                '</ul>'
             ].join("\n");
         <<<)
     },
     "files": {
-        "/examples/01-HelloWorld/index.html": "$__DIRNAME__/index.html"
+        "examples/01-HelloWorld/index.html": "$__DIRNAME__/index.html"
     }
 }
 
