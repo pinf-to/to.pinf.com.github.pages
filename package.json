@@ -1,6 +1,6 @@
 {
     "name": "to.pinf.com.github.pages",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "dependencies": {
         "bash.origin.test": "^0.1.29",
         "codeblock": "^0.3.1",
