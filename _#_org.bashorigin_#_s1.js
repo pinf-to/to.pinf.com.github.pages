@@ -11,6 +11,10 @@ const HIGHLIGHT = require("highlight.js");
 const VERBOSE = !!process.env.VERBOSE;
 
 
+exports.forConfig = function (config) {
+    return exports;
+}
+
 
 exports.replaceVariablesInCode = function (variables, code) {
 
@@ -36,6 +40,8 @@ exports.replaceVariablesInCode = function (variables, code) {
                     throw new Error("Variable with name '" + match[1] + "' not declared!");
 
                 }
+
+                if (VERBOSE) console.log("replace", match[0], variables[match[1]]);
 
                 line = line.replace(
                     new RegExp(ESCAPE_REGEXP(match[0]), "g"),
@@ -117,6 +123,51 @@ exports.publish = function (sourceBasePath, config, options) {
 
                 code = exports.replaceVariablesInCode(config.variables, code);
 
+                code = code.replace(/(<!--ON_RUN>>>|<<<ON_RUN-->)/g, "");
+
+                var blocks = {
+                    result: []
+                };
+
+                var lines = code.split("\n");
+                var buffer = null;
+                var re = /^RESULT:(.+)$/;
+                lines = lines.map(function (line) {
+
+                    if (
+                        !buffer ||
+                        typeof buffer === "string"
+                    ) {
+                        if (/```/.test(line)) {
+                            buffer = [];
+                        }
+                    } else
+                    if (
+                        buffer &&
+                        typeof buffer !== "string"
+                    ) {
+                        if (/```/.test(line)) {
+                            buffer = buffer.join("\n");
+                        } else {
+                            buffer.push(line);
+                        }
+                    }
+                    var match = re.exec(line);
+                    if (match) {
+                        blocks.result.push(
+                            match[1].replace(/&CODE&/g, buffer)
+                        );
+                        line = line.replace(
+                            new RegExp(ESCAPE_REGEXP(match[0]), "g"),
+                            '---ReSuLt-BlOcK-' + (blocks.result.length - 1) + '---'
+                        );
+                    }
+
+                    return line;
+                });
+
+                code = lines.join("\n");
+
                 var tokens = MARKED.lexer(code);
 
                 code = MARKED.parser(tokens, {
@@ -127,6 +178,20 @@ exports.publish = function (sourceBasePath, config, options) {
                         return HIGHLIGHT.highlightAuto(code).value;
                     }
                 });
+
+                re = /<p>---ReSuLt-BlOcK-(\d+)---<\/p>/gm;
+                while ( (match = re.exec(code)) ) {
+                    code = code.replace(
+                        new RegExp(ESCAPE_REGEXP(match[0]), "g"),
+                        [
+                            '<div class="markdown-block-result">',
+                            '<div class="result-label">Result</div>',
+                            blocks.result[parseInt(match[1])],
+                            '</div>'
+                        ].join("")
+                    );
+                }
+
             } else {
                 throw new Error("No parser found for file: " + path);
             }
@@ -152,12 +217,23 @@ exports.publish = function (sourceBasePath, config, options) {
             css = CODEBLOCK.thawFromJSON(css);
             if (css.getFormat() === "css") {
                 css = css.getCode();                        
+            } else
+            if (css.getFormat() === "javascript") {
+                css = CODEBLOCK.run(css, {
+                    config: config
+                }, {
+                    sandbox: {
+                        require: require,
+                        process: process
+                    }
+                });
             }
         }
         if (/^\//.test(css)) {
             css = "./" + PATH.relative(sourceBasePath, css);
         }
     }
+    if (process.env.VERBOSE) console.log("css", css);
 
     if (config.scripts) {
         config.scripts = config.scripts.map(function (script) {
@@ -167,6 +243,7 @@ exports.publish = function (sourceBasePath, config, options) {
             return script;
         });
     }
+    if (process.env.VERBOSE) console.log("config.scripts", config.scripts);
 
     if (
         config.anchors &&
@@ -182,6 +259,7 @@ exports.publish = function (sourceBasePath, config, options) {
             uriDepth: uriDepth
         });
         if (process.env.VERBOSE) console.log("targetPath", process.cwd() + "/" + targetPath);
+        if (VERBOSE) console.log("code:", code);
         FS.outputFileSync(targetPath, code, "utf8");
     }
 
@@ -189,19 +267,54 @@ exports.publish = function (sourceBasePath, config, options) {
         config &&
         config.files
     ) {
-        Object.keys(config.files).forEach(function (targetSubpath) {
-            if (/\.html?$/.test(targetSubpath)) {
-                var code = FS.readFileSync(config.files[targetSubpath], "utf8");
-                code = prepareAnchorCode(code);
-                code = BOILERPLATE.wrapHTML(code, {
-                    css: css,
-                    scripts: config.scripts,
-                    uriDepth: uriDepth + (targetSubpath.split("/").length - 1)
+        var files = config.files;
+
+        if (files[".@"] === "github.com~0ink~codeblock/codeblock:Codeblock") {
+            files = CODEBLOCK.thawFromJSON(files);
+            if (files.getFormat() === "javascript") {
+                files = CODEBLOCK.run(files, {
+                    config: config
+                }, {
+                    sandbox: {
+                        require: require,
+                        process: process
+                    }
                 });
-                FS.outputFileSync(targetSubpath, code, "utf8");
-            } else {
-                FS.copySync(config.files[targetSubpath], targetSubpath);
             }
+        }
+
+        if (VERBOSE) console.log("files:", files);
+
+        Object.keys(files).forEach(function (targetSubpath) {
+
+            if (!Array.isArray(targetSubpath)) {
+                targetSubpath = [
+                    targetSubpath
+                ];
+            }
+
+            targetSubpath.forEach(function (targetSubpath) {
+
+                var filePath = files[targetSubpath];
+
+                if (/\.html?$/.test(targetSubpath)) {
+                    var code = FS.readFileSync(filePath, "utf8");
+                    code = prepareAnchorCode(code);
+                    code = BOILERPLATE.wrapHTML(code, {
+                        css: css,
+                        scripts: config.scripts,
+                        uriDepth: uriDepth + (targetSubpath.split("/").length - 1)
+                    });
+                    FS.outputFileSync(targetSubpath, code, "utf8");
+                } else {
+
+                    var targetPath = targetSubpath.replace(/(^\/|\/\*$)/g, "");
+                    
+                    if (VERBOSE) console.log("Copy:", filePath, targetPath, "(pwd: " + process.cwd() + ")");
+
+                    FS.copySync(filePath, targetPath);
+                }
+            });
         });
     }
 }

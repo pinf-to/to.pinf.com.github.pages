@@ -9,14 +9,19 @@ function EXPORTS_getJSRequirePath {
     echo "$__DIRNAME__/_#_org.bashorigin_#_s1.js"
 }
 
+function EXPORTS_getTargetPath {
+    local gitRemoteUrl="$(git config --get remote.origin.url)"
+    if ! BO_test "$gitRemoteUrl" "github\\.com"; then
+        BO_exit_error "The 'origin' of your git remote must point to github!"
+    fi
+
+    echo "$__RT_DIRNAME__/targets/_$(BO_replace "$gitRemoteUrl" "^.+\\/([^\\/]+)\$")_$(BO_hash "$gitRemoteUrl")"
+}
+
 # @source https://github.com/pinf-to/pinf-to-github-pages/blob/master/bin/pinf-publish.js
 function EXPORTS_publish {
 
     echo "TEST_MATCH_IGNORE>>>"
-
-    if ! BO_has_cli_arg "--ignore-dirty" && ! CALL_git is_clean; then
-        BO_exit_error "Your git working directory has uncommitted changes!"
-    fi
 
     local gitRemoteUrl="$(git config --get remote.origin.url)"
     if ! BO_test "$gitRemoteUrl" "github\\.com"; then
@@ -29,21 +34,31 @@ function EXPORTS_publish {
     BO_log "$VERBOSE" "cwd: $(pwd)"
     BO_log "$VERBOSE" "sourceClonePath: $sourceClonePath"
 
-
-    CALL_git ensure_cloned_commit "$pagesClonePath" "$gitRemoteUrl" "gh-pages"
+    if [ ! -e "$pagesClonePath" ]; then
+        CALL_git ensure_cloned_commit "$pagesClonePath" "$gitRemoteUrl" "gh-pages"
+    fi
 
     local sourceBasePath="$(dirname "$sourceClonePath")"
 
+    pushd "$sourceBasePath" > /dev/null
+        if ! BO_has_arg "--ignore-dirty" "$@" && ! CALL_git is_clean; then
+            BO_exit_error "Your git working directory has uncommitted changes! (pwd: $(pwd))"
+        fi
+    popd > /dev/null
+
     pushd "$pagesClonePath" > /dev/null
 
-        # Add source repo as source remote
-        CALL_git ensure_remote "source" "file://$sourceClonePath"
+        if ! BO_has_arg "--dynamic-changes-only" "$@"; then
 
-        git clean -d -x -f
-        git fetch source
-        git merge source/master -m "Merged from master"
+            # Add source repo as source remote
+            CALL_git ensure_remote "source" "file://$sourceClonePath"
 
-        CALL_boilerplate copy_minimal_as_base "$@"
+            git clean -d -x -f
+            git fetch source
+            git merge source/master -m "Merged from master"
+
+            CALL_boilerplate copy_minimal_as_base "$@"
+        fi
 
         BO_run_recent_node --eval '
             const sourceBasePath = process.argv[1];
@@ -59,7 +74,7 @@ function EXPORTS_publish {
             });
         ' "${sourceBasePath}" "$(CALL_boilerplate getJSRequirePath)" "$@"
 
-        if ! BO_has_cli_arg "--dryrun"; then
+        if ! BO_has_arg "--dryrun" "$@"; then
 
             git add -A . 2> /dev/null || true
             git commit -m "Updated pages" 2> /dev/null || true
