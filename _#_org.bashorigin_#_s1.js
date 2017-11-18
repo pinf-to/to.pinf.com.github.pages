@@ -23,6 +23,8 @@ exports.forConfig = function (config) {
 
 exports.replaceVariablesInCode = function (variables, code) {
 
+    //console.log("replaceVariablesInCode(variables, code)", variables, code);
+
     // Trim lines
     code = code.split("\n").filter(function (line) {
         var m = line.match(/^\[IF:%%%([\w_]+?)%%%\]/);
@@ -114,7 +116,9 @@ exports.publish = function (sourceBasePath, config, options) {
 
     if (VERBOSE) console.log("cwd:", process.cwd());
 
-    config.variables = JSON.parse(exports.replaceVariablesInCode(config.variables, JSON.stringify(config.variables)));
+    if (config.variables) {
+        config.variables = JSON.parse(exports.replaceVariablesInCode(config.variables, JSON.stringify(config.variables)));
+    }
 
     function prepareAnchorCode (code) {
 
