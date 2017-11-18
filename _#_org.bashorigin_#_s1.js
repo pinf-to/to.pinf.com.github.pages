@@ -1,12 +1,17 @@
 
-const PATH = require("path");
-const FS = require("fs-extra");
-const LODASH = require("lodash");
-const CODEBLOCK = require("codeblock");
-const ESCAPE_REGEXP = require("escape-regexp");
 
-const MARKED = require("marked");
-const HIGHLIGHT = require("highlight.js");
+
+const LIB = require("./node_modules/.bin/bash.origin.workspace.inf.js").forPackage(__dirname).LIB;
+
+
+const PATH = LIB.PATH;
+const FS = LIB.FS_EXTRA;
+const LODASH = LIB.LODASH
+const CODEBLOCK = LIB.CODEBLOCK;
+const ESCAPE_REGEXP = LIB.ESCAPE_REGEXP;
+
+const MARKED = LIB.MARKED;
+const HIGHLIGHT = LIB.HIGHLIGHT_JS;
 
 const VERBOSE = !!process.env.VERBOSE;
 
