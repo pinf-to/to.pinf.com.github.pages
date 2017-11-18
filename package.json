@@ -1,12 +1,12 @@
 {
     "name": "to.pinf.com.github.pages",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "pm": {
         "publish": "npm"
     },
     "main": "_#_org.bashorigin_#_s1.js",
     "dependencies": {
-        "bash.origin.workspace": "^0.2.6",
+        "bash.origin.workspace": "^0.2.16",
         "escape-regexp": "0.0.1",
         "highlight.js": "^9.11.0",
         "marked": "^0.3.6"
