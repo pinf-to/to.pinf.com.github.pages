@@ -6,7 +6,7 @@
     },
     "main": "_#_org.bashorigin_#_s1.js",
     "dependencies": {
-        "bash.origin.workspace": "^0.2.68",
+        "bash.origin.workspace": "^0.2.71",
         "highlight.js": "^9.11.0",
         "marked": "^0.3.6"
     },
