@@ -12,5 +12,11 @@
     },
     "scripts": {
         "test": "bash.origin.test examples"
+    },
+    "config": {
+        "bash.origin.lib": {
+            "pack": "default",
+            "stream": "0.1"
+        }
     }
 }
