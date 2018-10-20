@@ -7,8 +7,8 @@
     "main": "_#_org.bashorigin_#_s1.js",
     "dependencies": {
         "bash.origin.lib": "^0.2.15",
-        "highlight.js": "^9.11.0",
-        "marked": "^0.3.6"
+        "highlight.js": "^9.13.1",
+        "marked": "^0.5.1"
     },
     "scripts": {
         "test": "bash.origin.test examples"
