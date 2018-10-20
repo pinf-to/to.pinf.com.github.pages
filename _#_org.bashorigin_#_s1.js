@@ -1,7 +1,7 @@
 
 
 
-const LIB = require("bash.origin.workspace").forPackage(__dirname).LIB;
+const LIB = require("bash.origin.lib").forPackage(__dirname).LIB;
 
 
 const PATH = LIB.PATH;
