@@ -33,6 +33,7 @@ function EXPORTS_publish {
 
     BO_log "$VERBOSE" "cwd: $(pwd)"
     BO_log "$VERBOSE" "sourceClonePath: $sourceClonePath"
+    BO_log "$VERBOSE" "pagesClonePath: $pagesClonePath"
 
     if [ ! -e "$pagesClonePath" ]; then
         CALL_git ensure_cloned_commit "$pagesClonePath" "$gitRemoteUrl" "gh-pages"
@@ -53,10 +54,16 @@ function EXPORTS_publish {
             # Add source repo as source remote
             CALL_git ensure_remote "source" "file://$sourceClonePath"
 
+            BO_log "$VERBOSE" "clean"
             git clean -d -x -f
+
+            BO_log "$VERBOSE" "fetch source"
             git fetch source
+
+            BO_log "$VERBOSE" "merge from master"
             git merge source/master -m "Merged from master"
 
+            BO_log "$VERBOSE" "copy boilerplate"
             CALL_boilerplate copy_minimal_as_base "$@"
         fi
 
@@ -76,9 +83,12 @@ function EXPORTS_publish {
 
         if ! BO_has_arg "--dryrun" "$@"; then
 
+            BO_log "$VERBOSE" "add files"
             git add -A . 2> /dev/null || true
+            BO_log "$VERBOSE" "commit changes"
             git commit -m "Updated pages" 2> /dev/null || true
 
+            BO_log "$VERBOSE" "push to origin gh-pages"
             git push origin gh-pages
         fi
 
