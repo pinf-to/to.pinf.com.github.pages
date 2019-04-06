@@ -5,18 +5,14 @@
         "publish": "npm"
     },
     "main": "_#_org.bashorigin_#_s1.js",
+    "__dependencies": {
+        "bash.origin.lib": "^0.2.15"
+    },
     "dependencies": {
-        "bash.origin.lib": "^0.2.15",
         "highlight.js": "^9.13.1",
         "marked": "^0.5.1"
     },
     "scripts": {
         "test": "bash.origin.test examples"
-    },
-    "config": {
-        "bash.origin.lib": {
-            "pack": "default",
-            "stream": "0.1"
-        }
     }
 }

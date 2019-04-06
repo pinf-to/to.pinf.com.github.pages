@@ -1,8 +1,6 @@
 
 
-
-const LIB = require("bash.origin.lib").forPackage(__dirname).LIB;
-
+const LIB = require("bash.origin.lib").forPackage(__dirname).js;
 
 const PATH = LIB.PATH;
 const FS = LIB.FS_EXTRA;
