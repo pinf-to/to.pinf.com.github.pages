@@ -1,8 +1,6 @@
 
 
-
-const LIB = require("./node_modules/.bin/bash.origin.workspace.inf.js").forPackage(__dirname).LIB;
-
+const LIB = require("bash.origin.lib").forPackage(__dirname).js;
 
 const PATH = LIB.PATH;
 const FS = LIB.FS_EXTRA;
@@ -326,5 +324,12 @@ exports.publish = function (sourceBasePath, config, options) {
             });
         });
     }
-}
 
+
+    if (config.routes) {
+        if (process.env.VERBOSE) console.log("config.routes", config.routes);
+
+        // Will publish all resources set to `print: true`.
+        LIB.BASH_ORIGIN_EXPRESS.hookRoutes(config.routes);
+    }
+}

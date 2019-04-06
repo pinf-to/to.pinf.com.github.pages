@@ -1,5 +1,7 @@
 /node_modules/
 /examples/*/.actual.*
-/.installed.*
+/.installed*
 *~.compiled.*
 .rt/
+.~*
+/package-lock.json

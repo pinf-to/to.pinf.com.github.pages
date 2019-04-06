@@ -1,15 +1,16 @@
 {
     "name": "to.pinf.com.github.pages",
-    "version": "0.1.7",
+    "version": "0.1.14",
     "pm": {
         "publish": "npm"
     },
     "main": "_#_org.bashorigin_#_s1.js",
+    "__dependencies": {
+        "bash.origin.lib": "^0.2.15"
+    },
     "dependencies": {
-        "bash.origin.workspace": "^0.2.16",
-        "escape-regexp": "0.0.1",
-        "highlight.js": "^9.11.0",
-        "marked": "^0.3.6"
+        "highlight.js": "^9.13.1",
+        "marked": "^0.5.1"
     },
     "scripts": {
         "test": "bash.origin.test examples"
