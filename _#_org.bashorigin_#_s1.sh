@@ -33,6 +33,7 @@ function EXPORTS_publish {
 
     BO_log "$VERBOSE" "cwd: $(pwd)"
     BO_log "$VERBOSE" "sourceClonePath: $sourceClonePath"
+    BO_log "$VERBOSE" "pagesClonePath: $pagesClonePath"
 
     if [ ! -e "$pagesClonePath" ]; then
         CALL_git ensure_cloned_commit "$pagesClonePath" "$gitRemoteUrl" "gh-pages"
