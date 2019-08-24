@@ -304,6 +304,19 @@ exports.publish = function (sourceBasePath, config, options) {
 
                 var filePath = files[targetSubpath];
 
+                if (/^\//.test(filePath)) {
+                } else
+                if (/^\./.test(filePath)) {
+                } else {
+                    filePath = PATH.join(
+                        LIB.RESOLVE.sync(filePath.split("/")[0] + "/package.json", {
+                            basedir: config.config.pwd
+                        }),
+                        "..",
+                        filePath.replace(/^[^\/]+\//, '')
+                    );
+                }
+
                 if (/\.html?$/.test(targetSubpath)) {
                     var code = FS.readFileSync(filePath, "utf8");
                     code = prepareAnchorCode(code);
