@@ -1,18 +1,16 @@
 {
-    "name": "to.pinf.com.github.pages",
-    "version": "0.1.14",
-    "pm": {
-        "publish": "npm"
-    },
-    "main": "_#_org.bashorigin_#_s1.js",
-    "__dependencies": {
-        "bash.origin.lib": "^0.2.15"
-    },
-    "dependencies": {
-        "highlight.js": "^9.13.1",
-        "marked": "^0.5.1"
-    },
-    "scripts": {
-        "test": "bash.origin.test examples"
-    }
+  "name": "to.pinf.com.github.pages",
+  "version": "0.2.0-pre.0",
+  "pm": {
+    "publish": "npm"
+  },
+  "main": "_#_org.bashorigin_#_s1.js",
+  "dependencies": {
+    "highlight.js": "^9.13.1",
+    "marked": "^0.5.1",
+    "bash.origin.lib": "^0.4.0-pre.0"
+  },
+  "scripts": {
+    "test": "bash.origin.test examples"
+  }
 }
